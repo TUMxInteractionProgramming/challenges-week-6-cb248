@@ -6,7 +6,7 @@ var yummy = {
     starred: false,
     expiresIn: 100,
     messageCount: 999,
-    messages : []           // #10 #message s property in #chl object
+    messages : ["dummy1", "dummy2"]           // #10 #message s property in #chl object
 };
 
 var sevencontinents = {
@@ -16,7 +16,7 @@ var sevencontinents = {
     starred: true,
     expiresIn: 60,
     messageCount: 5,
-    messages : []           // #10 #message s property in #chl object
+    messages : ["aloha", "ciao"]           // #10 #message s property in #chl object
 
 };
 

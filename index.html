@@ -25,11 +25,61 @@
     <!-- embed external JavaScript file for app interaction -->
     <script src="js/script.js"></script>
 
+    <!-- #11 #initialize app, move #onload functions -->
+    <script>
+    $(function(){
+        listChannels(compareNew);
+        loadEmojis();
+        console.log("App is initialized");
+        setInterval(function(){
+            
+            // update remaining time
+            var countDownTime = new Date(Date.now() + 15 * 60 * 1000).valueOf();
+            var now = new Date().getTime();
+            var distance = countDownTime - now;
+            var minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));   
+            $(this.expiresIn).innerHTML = minutes + ' min. left';
+
+            //$('channelObject.element').find('em');
+
+            // update color when <5min remaining
+            if (this.expiresIn < 300000) {
+                $('#addTime').css({color: '#3F51B5'});
+            }
+            // delete message when no time remaining
+            if (this.expiresIn <= 0){
+                $('#messageDiv').empty();
+            }
+            console.log("Updating message elements...");
+        }, 10000);
+    });
+
+        function myFunction() {
+            setInterval(function(){
+            // update remaining time
+            var t = Math.round((messageObject.expiresOn - Date.now()) / 1000 / 60);
+            document.getElementById(messageObject.expiresIn).innerHTML = t;
+            // update color when <5min remaining
+            if (messageObject.expiresIn < 300000) {
+                document.getElementById(this.button).css({color: 'red'});
+            }
+            // delete message when no time remaining
+            if (expiresIn <= 0){
+                document.getElementById(messageObject).empty();
+            }
+            console.log("Updating message elements...");
+            }, 10000);
+
+            
+        }
+
+    </script>
+
 </head>
 
 <!-- render all channels when the body has loaded -->
 <!-- #10 #sorting: append all channels in new #sort order when the body has #load ed ; #10 #emojis added more #suitable-->
-<body onload="listChannels(compareNew); loadEmojis()">
+<body>
 
 <!-- channel area -->
 <!-- #9 #shdw #elv: channels view goes 16dp high, like a nav drawer -->
@@ -44,7 +94,7 @@
 
     <!-- CHANNELS -->
     <ul>
-       <!-- Channels are added dynamically in listChannels() -->
+       <!-- Channels are added dynamically in listChannels(), switchChannel used to be onclick for channels -->
     </ul>
 
     <!-- #9 #flt #btn: FLOATING ACTION BUTTON -->

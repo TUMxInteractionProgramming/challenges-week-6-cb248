@@ -27,7 +27,8 @@ var currentLocation = {
  * Switch channels name in the right app bar
  * @param channelObject
  */
-function switchChannel(channelObject) {
+function switchChannel(channelObject, channelElement) { // #11 add parameter and reference #element
+
     // Log the channel switch
     console.log("Tuning in to channel", channelObject);
 
@@ -52,10 +53,22 @@ function switchChannel(channelObject) {
     /* highlight the selected #channel.
        This is inefficient (jQuery has to search all channel list items), but we'll change it later on */
     $('#channels li').removeClass('selected');
+
+    // old selector
     $('#channels li:contains(' + channelObject.name + ')').addClass('selected');
+
+    // #11 new selector #select ???
+    //$('channelElement').addClass('selected'); // replacing ^ with channelElement
+
+    // #11 call showmessages
+    // showMessages(channelObject);
 
     /* store selected channel in global variable */
     currentChannel = channelObject;
+
+    // #11 #messages
+    showMessages(channelObject);
+
 }
 
 /* liking a channel on #click */
@@ -120,8 +133,8 @@ function Message(text) {
     this.latitude = currentLocation.latitude;
     this.longitude = currentLocation.longitude;
     // set dates
-    this.createdOn = new Date() //now
-    this.expiresOn = new Date(Date.now() + 15 * 60 * 1000); // mins * secs * msecs
+    this.createdOn = new Date(); //now
+    this.expiresOn = new Date(Date.now() + 15 * 60 * 1000).valueOf(); // mins * secs * msecs
     // set text
     this.text = text;
     // own message
@@ -167,9 +180,11 @@ function sendMessage() {
 function createMessageElement(messageObject) {
     // Calculating the expiresIn-time from the expiresOn-property
     var expiresIn = Math.round((messageObject.expiresOn - Date.now()) / 1000 / 60);
+    var createdBy = messageObject.createdBy;
+    var createdOn = messageObject.createdOn;
 
     // Creating a message-element
-    return '<div class="message'+
+    /*return '<div class="message'+
         //this dynamically adds #own to the #message, based on the
         //ternary operator. We need () in order not to disrupt the return.
         (messageObject.own ? ' own' : '') +
@@ -180,8 +195,53 @@ function createMessageElement(messageObject) {
         '<em>' + expiresIn + ' min. left</em></h3>' +
         '<p>' + messageObject.text + '</p>' +
         '<button class="accent">+5 min.</button>' +
-        '</div>';
+        '</div>'; */
+
+
+// turn this into jquery
+    /* <div class="message own">
+            <h3><a href="http://w3w.co/cheeses.yard.applies" target="_blank"><strong>cheeses.yard.applies</strong></a>
+                Wed, June 20th, 13:37 <em>15 min. left</em></h3>
+            <p>What's the place you folks call home?</p>
+            <button class="accent">+5 min.</button>
+        </div> */
+
+        var div = $('<div>');
+        div.addClass('message own');
+        div.attr('id', 'messageDiv');
+        //if (messageObject.own == true) { 
+        //    $('<div>').addClass('own');
+        //}
+    
+        var h = $('<h3>');
+        h.text(createdOn);
+        h.appendTo(div);
+    
+        var a = $('<a>');
+        a.attr('href', 'http://w3w.co/' + createdBy);
+        a.attr('target', '_blank');
+        a.appendTo(h);
+    
+        var s = $('<strong>');
+        s.text(messageObject.createdBy);
+        s.appendTo(a);
+    
+        var e = $('<em>');
+        e.text(expiresIn + ' min. left');
+        e.attr('id', 'expire');
+        e.appendTo(h);
+    
+        $('<p>').text(messageObject.text).appendTo(div);
+    
+        var b = $('<button>');
+        b.addClass('accent');
+        b.attr('id', 'addTime');
+        b.appendTo(div);
+        b.text('+5 min.');
+    
+        return div; 
 }
+
 
 /* #10 Three #compare functions to #sort channels */
 /**
@@ -215,6 +275,7 @@ function compareFavorites(channelA, channelB) {
 }
 
 function listChannels(criterion) {
+
     // #10 #sorting: #sort channels#array by the criterion #parameter
     channels.sort(criterion);
 
@@ -225,6 +286,10 @@ function listChannels(criterion) {
     for (i = 0; i < channels.length; i++) {
         $('#channels ul').append(createChannelElement(channels[i]));
     };
+
+    // #11 #sort
+    $('#channels li:contains(' + currentChannel.name + ')').addClass('selected');
+
 }
 
 /**
@@ -307,9 +372,18 @@ function createChannelElement(channelObject) {
         </span>
      </li>
      */
+    
+    //$('<li>').click(function(){
+    //    switchChannel(channelObject, createChannelElement(channelObject)); // #11 #switch
+    //})
 
     // create a channel
     var channel = $('<li>').text(channelObject.name);
+
+    // #11 click event listener #click
+    channel.click(function() {
+        switchChannel(channelObject, this);
+    });
 
     // create and append channel meta
     var meta = $('<span>').addClass('channel-meta').appendTo(channel);
@@ -327,6 +401,7 @@ function createChannelElement(channelObject) {
 
     // return the complete channel
     return channel;
+    
 }
 
 /**
@@ -354,4 +429,24 @@ function abortCreationMode() {
     $('#app-bar-create').removeClass('show');
     $('#button-create').hide();
     $('#button-send').show();
+}
+
+// #11 #messages
+function showMessages(channelObject) {
+
+    // clear current entries
+    console.log("Messages: " + channelObject.messages);
+    $('#messages').empty();
+
+    var currentChannel = channelObject;
+    var text = channelObject.messages;
+
+    for (i=0; i < currentChannel.messages.length; i++) {
+
+        var text = channelObject.messages[i];
+
+        var message = new Message(text);
+
+        $('#messages').append(createMessageElement(message));
+    }
 }
